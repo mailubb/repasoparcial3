@@ -1,35 +1,48 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import {Section} from '../src/components/section/Section'
+import { useAppSelector, useAppDispatch } from './hooks/storeHook'
+import { useEffect } from 'react'
+import { getApiContent } from './service/getData'
+import { Book, Characters, Houses, Spells } from './types'
+import { addBook } from './store/slices/Book/slice'
+import { addCharacter } from './store/slices/Characters/slice'
+import { addHouse } from './store/slices/Houses/slice'
+import { addSpell } from './store/slices/Spells/slice'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const books = useAppSelector((state) => state.books)
+  const dispatch = useAppDispatch()
+  console.log(books) //PARA VER SI ME TRAE LA LISTA VACIA DEL ESTADO GLOBAL
+  
+  const getData = async () => {
+    
+      const books = getApiContent<Book>("books");
+      const characters = getApiContent<Characters>("characters");
+      const houses = getApiContent<Houses>("houses");
+      const spells = getApiContent<Spells>("spells");
+    console.log(books)
+    
+    const response = await Promise.all([books, characters, houses, spells]);
+    dispatch(addBook(response[0]));
+    dispatch(addCharacter(response[1]));
+    dispatch(addHouse(response[2]));
+    dispatch(addSpell(response[3]));
+  };
+
+  useEffect(() => {
+    getData()
+  }, [])
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <h1>Potter API</h1>
+      <Section dataId="characters"></Section>
+      <Section dataId="books"></Section>
+      <Section dataId="houses"></Section>
+      <Section dataId="spells"></Section>
     </>
   )
 }
+
 
 export default App
